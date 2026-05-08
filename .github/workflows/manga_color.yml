@@ -1,20 +1,21 @@
-name: MangaColoriz Professional Engine
+name: MangaColoriz Official Engine
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  colorize_manga:
+  colorize:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: System Memory Management
-        # إدارة ذكية: توفير مساحة مبادلة لمنع مقتل العملية (Process Kill)
+      - name: Fix and Expand Swap Space
+        # استبدلنا fallocate بـ dd لتجنب خطأ Text file busy وضمان التخصيص
         run: |
-          sudo fallocate -l 8G /swapfile
+          sudo swapoff -a
+          sudo dd if=/dev/zero of=/swapfile bs=1M count=7168
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
@@ -22,20 +23,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.8' # النسخة الأكثر توافقاً مع MangaColoriz الأصلية
 
-      - name: Install MangaColoriz Dependencies
+      - name: Install Official MangaColoriz
         run: |
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          pip install opencv-python pillow tqdm numpy
-          # تثبيت المكتبة الأصلية (أو محركها الأساسي)
-          pip install git+https://github.com/lllyasviel/ControlNet.git
+          pip install numpy opencv-python pillow tqdm
+          # تحميل المكتبة الأصلية مباشرة من المصدر
+          pip install git+https://github.com/lllyasviel/ControlNet-v1-1-nightly
 
-      - name: AI Processing
+      - name: Run MangaColoriz Engine
         run: python main.py
 
-      - name: Archive Results
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: AI-Colored-Manga
+          name: MangaColoriz-Results
           path: colored_results/
