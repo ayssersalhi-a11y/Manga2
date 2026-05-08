@@ -31,13 +31,14 @@ jobs:
       - name: Run Massive Colorizer
         run: python main.py
 
-      - name: Check Output Folder # خطوة للتأكد من وجود الصور في السجلات
-        run: ls -R colored_results/
+      - name: Check Output Folder
+        run: |
+          echo "Listing generated files:"
+          ls -R colored_results/
 
       - name: Upload Results
         uses: actions/upload-artifact@v4
         with:
           name: Professional-Colored-Manga
-          path: colored_results/*.jpg # يرفع كل الصور بصيغة jpg أو png
-          if-no-files-found: error # سيعطيك خطأ أحمر إذا لم يجد صوراً لتعرف السبب فوراً
-
+          path: colored_results/
+          if-no-files-found: error
