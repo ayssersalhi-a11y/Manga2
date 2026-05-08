@@ -19,7 +19,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx # ضروري لتشغيل مكتبات الصور على السيرفر
+          sudo apt-get install -y libgl1 libglib2.0-0  # هذه هي المكتبات البديلة والمستقرة
 
       - name: Install Manga Colorizer Core
         run: |
