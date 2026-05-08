@@ -1,8 +1,11 @@
 name: Manga AI Colorizer
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
-jobs: 
+jobs:
   colorization_job:
     runs-on: ubuntu-latest
     
@@ -24,3 +27,9 @@ jobs:
       - name: Run Colorizer
         run: |
           python main.py
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: colored-manga-pages
+          path: colored_results/  # تم التعديل هنا ليتوافق مع المجلد الجديد في الكود
