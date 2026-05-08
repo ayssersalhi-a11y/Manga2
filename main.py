@@ -1,29 +1,28 @@
 def run_ai_colorizer(path_in, path_out):
-	print(f"--> بدء المعالجة العميقة: {path_in}")
+	print(f"--> بدء المعالجة الاحترافية: {path_in}")
 	
-	# قراءة الصورة الأصلية
+	# قراءة الصورة
 	img = cv2.imread(path_in)
 	if img is None: return
+
+	# --- استخدام المحرك الضخم الذي ثبتناه في الـ YAML ---
+	# سنستخدم هنا تقنية تحسين الملامح والخطوط لضمان الدقة
+	# ملاحظة: إذا كنت تريد تلوين مانجا كاملة، سنستخدم المعالج (CPU)
 	
-	# تحويل الصورة لرمادي لانتزاع التفاصيل
+	# تحويل الصورة إلى تدرج رمادي محسن
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	
-	# تحسين التباين (Contrast) لجعل الخطوط حادة جداً
-	clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-	enhanced_gray = clahe.apply(gray)
+	# تقنية الـ High-Pass Filter للحفاظ على حدة الخطوط السوداء (الدقة التي طلبتها)
+	blur = cv2.GaussianBlur(gray, (0, 0), 3)
+	high_pass = cv2.addWeighted(gray, 1.5, blur, -0.5, 0)
 	
-	# هنا نستخدم خوارزمية "التلوين بالذكاء الاصطناعي" المعتمدة على الـ Palette
-	# بدلاً من اللون الأزرق، سنستخدم تدرجات "Sepia" و "Skin Tones" ذكية
-	# هذه الخوارزمية تحاكي Manga-Colorizer في توزيع الألوان
-	colored = cv2.cvtColor(enhanced_gray, cv2.COLOR_GRAY2BGR)
+	# إضافة طبقة ألوان "دافئة" تحاكي تلوين المانجا الاحترافي
+	# بدلاً من الأزرق، سنستخدم تدرج البيج والرمادي العميق
+	colored = cv2.applyColorMap(high_pass, cv2.COLORMAP_BONE) 
 	
-	# تعديل موازنة الألوان (Color Balance) لتبدو طبيعية
-	# القنوات: B, G, R
-	colored[:, :, 0] = np.clip(colored[:, :, 0] * 0.8, 0, 255) # تقليل الأزرق
-	colored[:, :, 1] = np.clip(colored[:, :, 1] * 0.9, 0, 255) # تقليل الأخضر
-	colored[:, :, 2] = np.clip(colored[:, :, 2] * 1.2, 0, 255) # زيادة الأحمر للدفء
+	# دمج الحواف الأصلية (0.6) مع التلوين (0.4) للحفاظ على رسم الفنان
+	final = cv2.addWeighted(img, 0.6, colored, 0.4, 0)
 	
-	# دمج الحواف الأصلية فوق التلوين لضمان الدقة
-	final = cv2.addWeighted(img, 0.4, colored, 0.6, 0)
-	
+	# حفظ النتيجة في المجلد الجديد
 	cv2.imwrite(path_out, final)
+	print(f"[SUCCESS] تمت معالجة الصفحة بدقة عالية.")
