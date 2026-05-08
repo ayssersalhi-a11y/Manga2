@@ -3,47 +3,58 @@ import torch
 import cv2
 import numpy as np
 
-# إعداد المجلدات
-INPUT_FOLDER = "input_manga"
-OUTPUT_FOLDER = "colored_manga"
+# إعداد المسارات - مجلدات منفصلة تماماً
+INPUT_DIR = "input_manga"   # هنا تضع فصول المانجا الأصلية
+OUTPUT_DIR = "colored_results" # هنا سيضع المحرك النتائج الملونة
 
-def prepare_folders():
-	if not os.path.exists(INPUT_FOLDER):
-		os.makedirs(INPUT_FOLDER)
-		print(f"تم إنشاء مجلد المدخلات: {INPUT_FOLDER}. ضع صورك فيه.")
-	if not os.path.exists(OUTPUT_FOLDER):
-		os.makedirs(OUTPUT_FOLDER)
-
-def colorize_image(image_path, output_path):
-	# هنا سنقوم باستدعاء النموذج لاحقاً 
-	# حالياً سنضع منطقاً بسيطاً للتأكد من أن الأكشن يعمل
-	print(f"جاري معالجة: {image_path}...")
+def setup_environment():
+	# إنشاء المجلدات إذا لم تكن موجودة
+	if not os.path.exists(INPUT_DIR):
+		os.makedirs(INPUT_DIR)
+		print(f"[*] تم إنشاء مجلد المدخلات: {INPUT_DIR}")
 	
-	img = cv2.imread(image_path)
-	if img is None:
-		print("خطأ: لا يمكن قراءة الصورة.")
+	if not os.path.exists(OUTPUT_DIR):
+		os.makedirs(OUTPUT_DIR)
+		print(f"[*] تم إنشاء مجلد المخرجات: {OUTPUT_DIR}")
+
+def process_manga_list():
+	setup_environment()
+	
+	# جلب قائمة الصور من مجلد المدخلات فقط
+	image_extensions = ('.png', '.jpg', '.jpeg', '.webp')
+	files = [f for f in os.listdir(INPUT_DIR) if f.lower().endswith(image_extensions)]
+	
+	if not files:
+		print("[!] لا توجد صور في مجلد المدخلات. يرجى رفع الصور في 'input_manga'.")
 		return
 
-	# تجربة: تحويل الصورة لدرجات رمادية ثم إضافة فلتر لوني (للتأكد من العمل)
-	# في الخطوة القادمة سنضع كود الذكاء الاصطناعي الحقيقي هنا
-	colored = cv2.applyColorMap(img, cv2.COLORMAP_JET)
-	
-	cv2.imwrite(output_path, colored)
-	print(f"تم حفظ الصورة الملونة في: {output_path}")
+	print(f"[*] تم العثور على {len(files)} صفحة. بدء التلوين...")
 
-def main():
-	prepare_folders()
-	
-	images = [f for f in os.listdir(INPUT_FOLDER) if f.endswith(('.png', '.jpg', '.jpeg'))]
-	
-	if not images:
-		print("لا توجد صور في مجلد input_manga.")
-		return
+	for filename in files:
+		input_path = os.path.join(INPUT_DIR, filename)
+		output_path = os.path.join(OUTPUT_DIR, f"colored_{filename}")
+		
+		# استدعاء دالة التلوين
+		run_ai_colorizer(input_path, output_path)
+		
+		# تنظيف الذاكرة بعد كل صورة لراحة المحرك
+		if torch.cuda.is_available():
+			torch.cuda.empty_cache()
 
-	for img_name in images:
-		in_path = os.path.join(INPUT_FOLDER, img_name)
-		out_path = os.path.join(OUTPUT_FOLDER, img_name)
-		colorize_image(in_path, out_path)
+def run_ai_colorizer(path_in, path_out):
+	print(f"--> جاري تلوين: {path_in}")
+	
+	# تحميل الصورة
+	img = cv2.imread(path_in)
+	if img is None: return
+
+	# --- هنا سنضع كود مكتبة المانجا الحقيقي في الخطوة القادمة ---
+	# حالياً سنقوم بعمل تأثير لوني للتأكد من أن الملفات تنتقل للمجلد الجديد
+	result = cv2.applyColorMap(img, cv2.COLORMAP_DEEPGREEN) 
+	
+	# حفظ النتيجة في المجلد المنفصل
+	cv2.imwrite(path_out, result)
+	print(f"[OK] تم الحفظ في: {path_out}")
 
 if __name__ == "__main__":
-	main()
+	process_manga_list()
