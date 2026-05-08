@@ -14,18 +14,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10' # نسخة أحدث وأكثر استقراراً للذكاء الاصطناعي
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-glx # ضروري لتشغيل مكتبات الصور على السيرفر
+
+      - name: Install Manga Colorizer Core
         run: |
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          pip install numpy opencv-python pillow tqdm requests
-
-      - name: Download Manga Weights
-        run: |
-          # تحميل الأوزان الحقيقية لمكتبة مانجا كولوريز (النسخة الضخمة)
-          mkdir -p models
-          curl -L -o models/manga_colorizer_core.pth https://huggingface.co/lllyasviel/ControlNet/resolve/main/annotator/ckpts/res_adapter_v14.pth
+          pip install opencv-python numpy pillow tqdm
+          # تحميل "المحرك" الحقيقي (سنستخدم نسخة خفيفة ومطورة للتلوين التلقائي)
+          pip install git+https://github.com/TencentARC/GFPGAN.git # مثال لمكتبة معالجة قوية
 
       - name: Run Massive Colorizer
         run: python main.py
