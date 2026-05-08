@@ -2,7 +2,7 @@ name: Manga AI Colorizer
 on:
   workflow_dispatch:
 
-jobs:
+jobs: 
   colorization_job:
     runs-on: ubuntu-latest
     
