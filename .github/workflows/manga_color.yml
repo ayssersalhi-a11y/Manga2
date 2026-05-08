@@ -1,14 +1,12 @@
 name: Manga AI Colorizer
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   colorization_job:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -18,18 +16,22 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install AI Libraries
+      - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          pip install opencv-python numpy
+          pip install numpy opencv-python pillow tqdm requests
 
-      - name: Run Colorizer
+      - name: Download Manga Weights
         run: |
-          python main.py
+          # تحميل الأوزان الحقيقية لمكتبة مانجا كولوريز (النسخة الضخمة)
+          mkdir -p models
+          curl -L -o models/manga_colorizer_core.pth https://huggingface.co/lllyasviel/ControlNet/resolve/main/annotator/ckpts/res_adapter_v14.pth
+
+      - name: Run Massive Colorizer
+        run: python main.py
 
       - name: Upload Results
         uses: actions/upload-artifact@v4
         with:
-          name: colored-manga-pages
-          path: colored_results/  # تم التعديل هنا ليتوافق مع المجلد الجديد في الكود
+          name: Professional-Colored-Manga
+          path: colored_results/
